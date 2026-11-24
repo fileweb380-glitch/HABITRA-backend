@@ -2,7 +2,9 @@ const mongoose = require('mongoose');
 
 const reminderJobSchema = new mongoose.Schema({
   owner: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
-  commitment: { type: mongoose.Schema.Types.ObjectId, ref: 'Commitment', required: true },
+  commitment: { type: mongoose.Schema.Types.ObjectId, ref: 'Commitment', required: false },
+  habit: { type: mongoose.Schema.Types.ObjectId, ref: 'Habit', required: false },
+  type: { type: String, enum: ['START', 'END'], required: true },
   channel: { type: String, enum: ['email', 'push'], required: true },
   scheduledFor: { type: Date, required: true, index: true },
   idempotencyKey: { type: String, required: true, unique: true },

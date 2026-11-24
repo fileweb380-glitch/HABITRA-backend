@@ -8,12 +8,15 @@ const commitmentSchema = new mongoose.Schema({
   scheduledDate: { type: String, required: true, index: true }, // YYYY-MM-DD
   startTime: { type: String }, // HH:mm or null
   isFlexible: { type: Boolean, default: false },
-  durationMinutes: { type: Number, required: true, default: 30 },
+  isFlexibleDuration: { type: Boolean, default: false },
+  durationMinutes: { type: Number, default: 30 }, // null if isFlexibleDuration is true
   status: {
     type: String,
     enum: ['Scheduled', 'In progress', 'Completed', 'Missed', 'Unconfirmed', 'Rescheduled', 'Cancelled'],
     default: 'Scheduled'
   },
+  missedReason: { type: String },
+  missedNote: { type: String },
   reminderPreferences: {
     email: { type: Boolean, default: true },
     push: { type: Boolean, default: true },

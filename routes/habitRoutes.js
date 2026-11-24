@@ -1,9 +1,27 @@
 const express = require('express');
 const router = express.Router();
-const { getHabits, createHabit, logHabitEntry } = require('../controllers/habitController');
-const requireAuth = require('../middleware/requireAuth');
+const {
+  getHabits,
+  createHabit,
+  logHabitEntry,
+  handleEmailCheckinResponse,
+  updateHabit,
+  deleteHabit
+} = require('../controllers/habitController');
+const { protect } = require('../middleware/authMiddleware');
 
-router.route('/').get(requireAuth, getHabits).post(requireAuth, createHabit);
-router.post('/:habitId/entries', requireAuth, logHabitEntry);
+// Public one-click email check-in endpoint
+router.get('/checkin-response', handleEmailCheckinResponse);
+
+// Protected habit routes
+router.route('/')
+  .get(protect, getHabits)
+  .post(protect, createHabit);
+
+router.post('/:habitId/entry', protect, logHabitEntry);
+
+router.route('/:id')
+  .put(protect, updateHabit)
+  .delete(protect, deleteHabit);
 
 module.exports = router;
