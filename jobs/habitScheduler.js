@@ -13,8 +13,8 @@ if (process.env.VAPID_PUBLIC_KEY && process.env.VAPID_PRIVATE_KEY) {
   );
 }
 
-const API_BASE_URL = process.env.BACKEND_URL || 'http://localhost:5000';
-const FRONTEND_BASE_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const API_BASE_URL = (process.env.BACKEND_URL || 'https://habitra-backend-1.onrender.com').replace(/\/$/, '');
+const FRONTEND_BASE_URL = (process.env.FRONTEND_URL || 'https://habitra-black.vercel.app').replace(/\/$/, '');
 
 // Helper: Get YYYY-MM-DD in Africa/Addis_Ababa
 const getAddisDateString = (dateObj = new Date()) => {

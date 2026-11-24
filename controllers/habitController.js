@@ -2,9 +2,10 @@ const Habit = require('../models/Habit');
 const HabitEntry = require('../models/HabitEntry');
 const asyncHandler = require('../utils/asyncHandler');
 
-const FRONTEND_BASE_URL = process.env.FRONTEND_URL || 'http://localhost:5173';
+const FRONTEND_BASE_URL = (
+  process.env.FRONTEND_URL || 'https://habitra-black.vercel.app'
+).replace(/\/+$/, '');
 
-// Helper: Get YYYY-MM-DD in Africa/Addis_Ababa
 const getAddisDateString = () => {
   const parts = new Intl.DateTimeFormat('en-CA', {
     timeZone: 'Africa/Addis_Ababa',
@@ -16,16 +17,19 @@ const getAddisDateString = () => {
   const year = parts.find((p) => p.type === 'year').value;
   const month = parts.find((p) => p.type === 'month').value;
   const day = parts.find((p) => p.type === 'day').value;
+
   return `${year}-${month}-${day}`;
 };
 
-// @desc    Get all active habits for user
 const getHabits = asyncHandler(async (req, res) => {
-  const habits = await Habit.find({ user: req.user._id, status: 'active' }).sort({ createdAt: -1 });
+  const habits = await Habit.find({
+    user: req.user._id,
+    status: 'active'
+  }).sort({ createdAt: -1 });
+
   res.json(habits);
 });
 
-// @desc    Create a new habit
 const createHabit = asyncHandler(async (req, res) => {
   const {
     title,
@@ -48,7 +52,10 @@ const createHabit = asyncHandler(async (req, res) => {
   }
 
   const habitTime = isFlexibleTime ? null : (time || scheduledTime || '08:00');
-  const habitDuration = isFlexibleDuration ? 5 : (durationMinutes !== undefined ? Number(durationMinutes) : 30);
+  const habitDuration = isFlexibleDuration
+    ? 5
+    : (durationMinutes !== undefined ? Number(durationMinutes) : 30);
+
   const chosenReminderPref = reminderPref || req.user.reminderPref || 'both';
 
   const habit = await Habit.create({
@@ -70,23 +77,28 @@ const createHabit = asyncHandler(async (req, res) => {
   res.status(201).json(habit);
 });
 
-// @desc    Log a habit entry completion or missed reason (from frontend modal or dashboard)
 const logHabitEntry = asyncHandler(async (req, res) => {
   const { habitId } = req.params;
   const { date, outcome, quantity, note } = req.body;
 
   const targetDate = date || getAddisDateString();
 
-  // Habit model uses 'user'
-  const habit = await Habit.findOne({ _id: habitId, user: req.user._id });
+  const habit = await Habit.findOne({
+    _id: habitId,
+    user: req.user._id
+  });
+
   if (!habit) {
     res.status(404);
     throw new Error('Habit not found');
   }
 
-  // HabitEntry model uses 'owner'
   const entry = await HabitEntry.findOneAndUpdate(
-    { owner: req.user._id, habit: habitId, date: targetDate },
+    {
+      owner: req.user._id,
+      habit: habitId,
+      date: targetDate
+    },
     {
       owner: req.user._id,
       habit: habitId,
@@ -95,13 +107,16 @@ const logHabitEntry = asyncHandler(async (req, res) => {
       quantity,
       note: note || ''
     },
-    { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
+    {
+      returnDocument: 'after',
+      upsert: true,
+      setDefaultsOnInsert: true
+    }
   );
 
   res.json(entry);
 });
 
-// @desc    Handle one-click email response (e.g., "Yes, Completed")
 const handleEmailCheckinResponse = asyncHandler(async (req, res) => {
   const { habitId, status, date, note } = req.query;
 
@@ -110,6 +125,7 @@ const handleEmailCheckinResponse = asyncHandler(async (req, res) => {
   }
 
   const habit = await Habit.findById(habitId);
+
   if (!habit) {
     return res.status(404).send('<h3>Habit not found or deleted.</h3>');
   }
@@ -117,25 +133,43 @@ const handleEmailCheckinResponse = asyncHandler(async (req, res) => {
   const targetDate = date || getAddisDateString();
   const resolvedOutcome = status === 'Completed' ? 'Completed' : 'Missed';
 
-  // HabitEntry model uses 'owner' (habit.user holds the User ObjectId)
   await HabitEntry.findOneAndUpdate(
-    { owner: habit.user, habit: habit._id, date: targetDate },
+    {
+      owner: habit.user,
+      habit: habit._id,
+      date: targetDate
+    },
     {
       owner: habit.user,
       habit: habit._id,
       date: targetDate,
       outcome: resolvedOutcome,
-      note: note || (resolvedOutcome === 'Completed' ? 'Completed via email check-in' : 'Not completed')
+      note: note || (
+        resolvedOutcome === 'Completed'
+          ? 'Completed via email check-in'
+          : 'Not completed'
+      )
     },
-    { returnDocument: 'after', upsert: true, setDefaultsOnInsert: true }
+    {
+      returnDocument: 'after',
+      upsert: true,
+      setDefaultsOnInsert: true
+    }
   );
 
-  return res.redirect(`${FRONTEND_BASE_URL}/reports/daily?date=${targetDate}&checkinSuccess=1`);
+  const redirectUrl = new URL('/reports/daily', `${FRONTEND_BASE_URL}/`);
+  redirectUrl.searchParams.set('date', targetDate);
+  redirectUrl.searchParams.set('checkinSuccess', '1');
+
+  return res.redirect(redirectUrl.toString());
 });
 
-// @desc    Update a habit
 const updateHabit = asyncHandler(async (req, res) => {
-  const habit = await Habit.findOne({ _id: req.params.id, user: req.user._id });
+  const habit = await Habit.findOne({
+    _id: req.params.id,
+    user: req.user._id
+  });
+
   if (!habit) {
     res.status(404);
     throw new Error('Habit not found');
@@ -171,17 +205,25 @@ const updateHabit = asyncHandler(async (req, res) => {
   if (status !== undefined) habit.status = status;
 
   const updatedHabit = await habit.save();
+
   res.json(updatedHabit);
 });
 
-// @desc    Delete a habit
 const deleteHabit = asyncHandler(async (req, res) => {
-  const habit = await Habit.findOneAndDelete({ _id: req.params.id, user: req.user._id });
+  const habit = await Habit.findOneAndDelete({
+    _id: req.params.id,
+    user: req.user._id
+  });
+
   if (!habit) {
     res.status(404);
     throw new Error('Habit not found');
   }
-  res.json({ message: 'Habit deleted successfully', id: req.params.id });
+
+  res.json({
+    message: 'Habit deleted successfully',
+    id: req.params.id
+  });
 });
 
 module.exports = {

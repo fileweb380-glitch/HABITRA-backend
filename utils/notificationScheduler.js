@@ -86,8 +86,8 @@ const initNotificationScheduler = () => {
         if (currentTimeStr === endTimeStr) {
           const checkinTitle = `HABITRA Check-in: Did you complete "${item.title}"?`;
           const checkinBody = `Your duration for "${item.title}" has ended. Please log your completion status.`;
-          const yesUrl = `http://localhost:5173/reports/daily?status=Completed&id=${item._id}`;
-          const noUrl = `http://localhost:5173/reports/daily?status=Missed&id=${item._id}`;
+          const yesUrl = `https://habitra-black.vercel.app/reports/daily?status=Completed&id=${item._id}`;
+          const noUrl = `https://habitra-black.vercel.app/reports/daily?status=Missed&id=${item._id}`;
 
           // Email Channel
           if (pref === 'email' || pref === 'both') {
