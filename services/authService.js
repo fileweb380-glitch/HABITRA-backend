@@ -1,4 +1,3 @@
-
 const User = require('../models/User');
 const sendEmail = require('../utils/sendEmail');
 const crypto = require('crypto');
@@ -10,7 +9,7 @@ const jwt = require('jsonwebtoken');
 // ==========================================
 
 const FRONTEND_BASE_URL = (
-  process.env.FRONTEND_URL || 'https://habitra-black.vercel.app'
+  process.env.FRONTEND_URL || 'https://habitra-jmujqypdt-abdu2.vercel.app'
 ).replace(/\/+$/, '');
 
 const DEFAULT_TIMEZONE = 'Africa/Addis_Ababa';
