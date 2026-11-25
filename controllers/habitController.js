@@ -3,7 +3,7 @@ const HabitEntry = require('../models/HabitEntry');
 const asyncHandler = require('../utils/asyncHandler');
 
 const FRONTEND_BASE_URL = (
-  process.env.FRONTEND_URL || 'https://habitra-black.vercel.app'
+  process.env.FRONTEND_URL || 'https://habitra-jmujqypdt-abdu2.vercel.app'
 ).replace(/\/+$/, '');
 
 const getAddisDateString = () => {
