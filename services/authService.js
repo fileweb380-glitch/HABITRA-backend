@@ -9,7 +9,7 @@ const jwt = require('jsonwebtoken');
 // ==========================================
 
 const FRONTEND_BASE_URL = (
-  process.env.FRONTEND_URL || 'https://habitra-jmujqypdt-abdu2.vercel.app'
+  process.env.FRONTEND_URL || 'https://habitra-l863u5795-abdu2.vercel.app'
 ).replace(/\/+$/, '');
 
 const DEFAULT_TIMEZONE = 'Africa/Addis_Ababa';
