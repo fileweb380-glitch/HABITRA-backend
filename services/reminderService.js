@@ -7,7 +7,7 @@ const { sendEmail } = require('./emailService');
 const logger = require('../utils/logger');
 
 const API_BASE_URL = (process.env.BACKEND_URL || 'https://habitra-backend-1.onrender.com').replace(/\/$/, '');
-const FRONTEND_BASE_URL = (process.env.FRONTEND_URL || 'https://habitra-jmujqypdt-abdu2.vercel.app').replace(/\/$/, '');
+const FRONTEND_BASE_URL = (process.env.FRONTEND_URL || 'https://habitra-l863u5795-abdu2.vercel.app/').replace(/\/$/, '');
 
 const getAddisDateString = (dateObj = new Date()) => {
   const parts = new Intl.DateTimeFormat('en-CA', {
