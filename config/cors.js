@@ -1,4 +1,6 @@
+
 const allowedOrigins = [
+  'https://habitra-abdu2.vercel.app',
   'https://habitra-black.vercel.app',
   'https://habitra-l863u5795-abdu2.vercel.app',
   'http://localhost:5173',
@@ -9,10 +11,10 @@ const allowedOrigins = [
 const corsOptions = {
   origin: (origin, callback) => {
     if (!origin || allowedOrigins.includes(origin)) {
-      callback(null, true);
-    } else {
-      callback(new Error(`Origin ${origin} not allowed by CORS`));
+      return callback(null, true);
     }
+
+    return callback(new Error(`Origin ${origin} not allowed by CORS`));
   },
   credentials: true,
   methods: ['GET', 'POST', 'PUT', 'PATCH', 'DELETE', 'OPTIONS'],
@@ -20,3 +22,4 @@ const corsOptions = {
 };
 
 module.exports = corsOptions;
+
