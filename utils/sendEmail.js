@@ -1,61 +1,51 @@
+
 const nodemailer = require('nodemailer');
 
 const sendEmail = async (options) => {
   const recipient = options.email || options.to;
   const textContent = options.message || options.text;
-  const fromAddress =
-    process.env.FROM_EMAIL ||
-    process.env.EMAIL_USER ||
-    process.env.SMTP_USER ||
-    'onboarding@resend.dev';
 
-  if (process.env.RESEND_API_KEY) {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        Authorization: `Bearer ${process.env.RESEND_API_KEY}`,
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({
-        from: `HABITRA <${fromAddress}>`,
-        to: [recipient],
-        subject: options.subject,
-        text: textContent,
-        html: options.html
-      })
-    });
-
-    if (!response.ok) {
-      const errText = await response.text();
-      throw new Error(`Resend API error (${response.status}): ${errText}`);
-    }
-
-    return;
+  if (!recipient) {
+    throw new Error('Email recipient is required.');
   }
+
+  const emailUser = process.env.SMTP_USER || process.env.EMAIL_USER;
+  const emailPassword = process.env.SMTP_PASS || process.env.EMAIL_PASS;
+
+  if (!emailUser || !emailPassword) {
+    throw new Error(
+      'SMTP configuration is missing. Set SMTP_USER and SMTP_PASS.'
+    );
+  }
+
+  const port = Number(process.env.SMTP_PORT) || 587;
 
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: Number(process.env.SMTP_PORT) || 587,
-    secure: Number(process.env.SMTP_PORT) === 465,
-    connectionTimeout: 10000,
-    greetingTimeout: 10000,
-    socketTimeout: 15000,
+    port,
+    secure: port === 465,
     auth: {
-      user: process.env.SMTP_USER || process.env.EMAIL_USER,
-      pass: process.env.SMTP_PASS || process.env.EMAIL_PASS
+      user: emailUser,
+      pass: emailPassword
     },
-    tls: {
-      rejectUnauthorized: false
-    }
+    connectionTimeout: 15000,
+    greetingTimeout: 15000,
+    socketTimeout: 20000
   });
 
-  await transporter.sendMail({
-    from: `"HABITRA" <${fromAddress}>`,
+  const mailOptions = {
+    from: `"HABITRA" <${process.env.FROM_EMAIL || emailUser}>`,
     to: recipient,
-    subject: options.subject,
+    subject: options.subject || 'HABITRA Notification',
     text: textContent,
     html: options.html
-  });
+  };
+
+  const result = await transporter.sendMail(mailOptions);
+
+  console.log('Email successfully sent:', result.messageId);
+
+  return result;
 };
 
 module.exports = sendEmail;
